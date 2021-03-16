@@ -1,0 +1,119 @@
+*{
+    margin:0;
+    padding:0;
+}
+
+
+.form {
+    display: flex;
+    height: 100vh;
+    @media only screen and (max-width: 768px) {
+      flex-direction: column;
+    }
+  
+
+    &-head {
+        width:50%;
+        padding-top: 2rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background-image:linear-gradient(to top,#78EFA6,white);
+
+        &-primary {
+            font-size: 2rem;
+            letter-spacing: 5px;
+            font-family: "Courier New", Courier, monospace;
+        }
+
+        &-image{
+            width:45rem;
+        }
+
+        &-secondary {
+            margin-top:3rem;
+            font-size: 1.5rem;
+            justify-content: end;
+            font-family: "Courier New", Courier, monospace;
+            text-align: center;
+            letter-spacing: 2px;
+        }
+
+        @media only screen and (max-width: 768px) {
+            width:100%;
+            &-primary {
+                font-size: 1.5rem;
+                text-align: center;
+                letter-spacing: 1px;
+                margin-bottom: 2rem;
+            }
+    
+            &-image{
+                width:20rem;
+            }
+    
+            &-secondary {
+                font-size: 1.1rem;
+            }
+          }
+    }
+
+    &-box {
+        width:50%;
+        display: flex;
+        font-size: 5rem;
+        border: 1px solid grey;
+        border-radius: 5px;
+        padding-top:1rem;
+        background-color: white;
+        
+       
+        &-col1 {
+            width: 35%;
+            display: flex;
+            flex-direction: column;
+            margin:2rem 0;
+            margin-left: 5rem;
+            & .field {
+                margin-bottom: 2rem;
+                font-size: 3rem;
+
+            }
+        }
+
+        &-col2 {
+            width:35%;
+            margin:2rem 0;
+            margin-left: 6rem;
+            display: flex;
+            flex-direction: column;
+
+            & .field {
+                margin-bottom: 2rem;
+            }
+        }
+    }
+    @media only screen and (max-width: 768px) {
+        &-box {
+            width:100%;
+            flex-direction: column;
+            padding: 15px;
+            border:none;
+
+            &-col1 {
+                width:90%;
+                margin: 0;
+            }
+            &-col2 {
+                width:90%;
+                margin: 0;
+            }
+        }
+    }
+}
+.style_calender{
+    width:100px;
+    color:red;
+    font-size: 20rem;
+
+}
