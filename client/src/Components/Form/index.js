@@ -1,33 +1,19 @@
 import React, { useState } from 'react'
-// import {useHistory} from "react-router-dom";
 import './FormStyles.scss';
 import { Formik, Form, Field } from 'formik';
-import MultipleDatePicker from 'react-multiple-datepicker';
-import {DatePicker as datepicker} from "react-multi-date-picker";
+import {default as datepicker} from "react-multi-date-picker";
+
 import {
   Button,
   LinearProgress,
   MenuItem,
-  FormControl,
-  InputLabel,
-  FormControlLabel,
-  Typography,
-  makeStyles,
 } from '@material-ui/core';
 
-import {
-  fieldToTextField,
-  TextField,
-  TextFieldProps,
-  Select,
-  Switch,
-} from 'formik-material-ui';
-import {
-  TimePicker,
-  DatePicker,
-  DateTimePicker,
-} from 'formik-material-ui-pickers';
-import axios from 'axios';
+import "react-multi-date-picker/styles/layouts/mobile.css";
+import { DatePanel } from "react-multi-date-picker/plugins";
+import {TextField} from 'formik-material-ui'; 
+
+
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import DateFnsUtils from '@date-io/date-fns';
 import AreaData from './AreaData';
@@ -36,34 +22,42 @@ import Product from './Product';
 import image from '../../images/green-3.svg';
 
 
-const Form_sheet = () => {
 
-  const[subscription_type,set_subscription_type]=useState('')
-  const [value, setValue] = useState(new Date());
+const Form_sheet = () => {
+  const today = new Date()
+  const tomorrow = new Date()
+
+  tomorrow.setDate(tomorrow.getDate() + 1)
+
+
+  const [subscription_type, set_subscription_type] = useState('')
+  const [specific_dates, setspecificdates] = useState([today,tomorrow])
+  const [date_range,setdaterange]=useState([today,tomorrow])
+  const [date,setDate]=useState()
 
 
   function isDate(val) {
     // Cross realm comptatible
     return Object.prototype.toString.call(val) === '[object Date]'
   }
-  
+
   function isObj(val) {
     return typeof val === 'object'
   }
-  
-   function stringifyValue(val) {
+
+  function stringifyValue(val) {
     if (isObj(val) && !isDate(val)) {
       return JSON.stringify(val)
     } else {
       return val
     }
   }
-  
+
   function buildForm({ action, params }) {
     const form = document.createElement('form')
     form.setAttribute('method', 'post')
     form.setAttribute('action', action)
-  
+
     Object.keys(params).forEach(key => {
       const input = document.createElement('input')
       input.setAttribute('type', 'hidden')
@@ -71,38 +65,28 @@ const Form_sheet = () => {
       input.setAttribute('value', stringifyValue(params[key]))
       form.appendChild(input)
     })
-  
+
     return form
   }
-  
-   function post(details) {
+
+  function post(details) {
     const form = buildForm(details)
     document.body.appendChild(form)
     form.submit()
     form.remove()
   }
 
-const getData=(data)=>
-{
+  const getData = (data) => {
 
-return fetch(`/api/payment`,{
-    method:"POST",
-    headers:{
-        Accept:"application/json",
-        "Content-Type":"application/json"
-    },
-    body:JSON.stringify(data)
-}).then(response=>response.json()).catch(err=>console.log(err))
-}
-
-
-
-// const makePayment=()=>
-// {
-
-// }
-
-
+    return fetch(`/api/payment`, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(data)
+    }).then(response => response.json()).catch(err => console.log(err))
+  }
 
 
   return (
@@ -112,15 +96,11 @@ return fetch(`/api/payment`,{
 
         <h2 className='form-head-primary'> START WITH OUR SUBSCRIPTION </h2>
         <img className='form-head-image' src={image} alt='image'></img>
-
-
-
         <h3 className='form-head-secondary'>
           Subscribe with us to get farm fresh organic batter on a regular basis, delivered at your doorsteps.
       </h3>
 
       </div>
-
 
       <Formik
         initialValues={{
@@ -135,8 +115,9 @@ return fetch(`/api/payment`,{
           landmark: '',
           area: '',
           start_date: new Date(),
-          end_date:new Date(),
-          dates_to_supply: '',
+          end_date: new Date(),
+          Date_Range:'',
+          Specific_Dates: '',
           subscription_type: '',
           product: ''
         }}
@@ -189,6 +170,7 @@ return fetch(`/api/payment`,{
           if (!values.area) {
             errors.area = 'Select Your Location'
           }
+
           if (!values.subscription_type) {
             errors.subscription_type = 'Select your subcription type'
           }
@@ -201,53 +183,34 @@ return fetch(`/api/payment`,{
           if (!values.street_name_or_apartment_name) {
             errors.street_name_or_apartment_name = 'Street name/Apartment name required'
           }
+           
           return errors;
         }}
         onSubmit={(values, { setSubmitting }) => {
           setTimeout(() => {
             setSubmitting(false);
+            getData({
+              "user_name": values.user_name.toString(),
+              "amount": '2400',
+              "mobile_number": values.mobile_number.toString(),
+              "email": values.email.toString()
+            }).then(response => {
 
-            // axios({
-            //   method:'get',
-            //   url:'/'
-            // }).then((response)=>(console.log(response)))
+              var information = {
+                action: "https://securegw-stage.paytm.in/order/process",
+                params: response
+              }
+              post(information)
 
-          //   axios({
-          //     method: 'post',
-          //     url: '/api/payment',
-          //     data: {"user_name":values.user_name.toString(),
-          //            "amount":'2400',
-          //            "mobile_number":values.mobile_number.toString(),
-          //            "email":values.email.toString()
-          //            }
-          //   }).then((response)=>{
-          //     var information={
-          //       action:"https://securegw-stage.paytm.in/order/process",
-          //       params:response
-          //   }
-          // post(information)
-          //   })
-          // makePayment();
-          getData({"user_name":values.user_name.toString(),
-"amount":'2400',
-"mobile_number":values.mobile_number.toString(),
-"email":values.email.toString()
-}).then(response=>{
+            })
+           
+            // make use of specific dates if specific dates is selected else use dates_range in backend
+            values={
+              ...values,
+              Specific_Dates:specific_dates,
+              Date_Range:date_range
+            }
 
-var information={
-    action:"https://securegw-stage.paytm.in/order/process",
-    params:response
-}
-post(information)
-
-})
-
-            // navigateTo();
-
-            // getData({'user_name':"aravind",'amount':"500","email":"araviku04@gmail.com","mobile_number":"8778570834"}).then(response=>console.log(response))
-
-
-            
             alert(JSON.stringify(values, null, 2));
           }, 500);
         }}
@@ -257,6 +220,7 @@ post(information)
 
             <Form className='form-box'>
               <div className='form-box-col1'>
+              
 
                 <Field className='field'
                   component={TextField}
@@ -333,26 +297,30 @@ post(information)
                     </MenuItem>
                   ))}
                 </Field>
-
-
-                <Button
-                  className='field button'
-                  variant="contained"
-                  color="primary"
-                  disabled={isSubmitting}
-                  onClick={submitForm}
+                <Field
+                  component={TextField}
+                  className='field'
+                  type="text"
+                  name="product"
+                  label="Products"
+                  select
+                  variant="standard"
+                  helperText="Select Product"
+                  margin="normal"
+                  inputProps={{ style: { fontSize: 25 } }}
+                  InputLabelProps={{ style: { fontSize: 22 } }}
                 >
-                  Subscribe
-            </Button>
-
-
-
-
+                  {Product.map((data, index) => (
+                    <MenuItem key={index} value={data}>
+                      {data}
+                    </MenuItem>
+                  ))}
+                </Field>
               </div>
-
               {isSubmitting && <LinearProgress />}
 
               <div className='form-box-col2'>
+
 
                 <Field className='field'
                   component={TextField}
@@ -401,58 +369,67 @@ post(information)
                   select
                   variant="standard"
                   margin="normal"
-                  
+
                   inputProps={{ style: { fontSize: 25 } }}
                   InputLabelProps={{ style: { fontSize: 22 } }}
-                  onClick={(e)=>(set_subscription_type(e.target.value))}
+                  onClick={(e) => (set_subscription_type(e.target.value))}
                 >
                   {SubscsiiptionType.map((data, index) => (
                     <MenuItem key={index} value={data}>
                       {data}
                     </MenuItem>
                   ))}
-                  
+
 
                 </Field>
 
-                {subscription_type!=='Only On Specified Days' ? 
-               
-                  <>
+                {subscription_type !== 'Only On Specified Days' ?
+              <div className="datepicker">
+                  <p className="datepicker-helpertext">Select Start date &#38; End Dates</p>
                   <Field
-                  className='field'
-                  component={DatePicker}
-                  name="start_date"
-                  label="Start Date"
+                  component={datepicker}
+                  range
+                  value={date_range}
+                  onChange={setdaterange}
+                  className="rmdp-mobile"
+                  inputClass='datepicker-button'
+                  type="button"
+                  minDate={new Date}
+                  plugins={[
+                    <DatePanel />
+                  ]}/>
+                  </div>
+                  :
+                  <div className="datepicker">
+                  <p className="datepicker-helpertext">Select Specific Dates</p>
+                  <Field
+                  component={datepicker}
+                  multiple
+                  value={specific_dates}
+                  onChange={setspecificdates}
+                  className="rmdp-mobile"
+                  inputClass='datepicker-button'
+                  type="button"
+                  minDate={new Date}
+                  plugins={[
+                    <DatePanel />
+                  ]}/>
+                  </div>
+                }
+                {console.log(date_range)}
+                {console.log(specific_dates)}
+                
+                <Button
+                  className={['field','button'].join('')}
+                  variant="contained"
+                  color="primary"
+                  disabled={isSubmitting}
+                  onClick={submitForm}
                   inputProps={{ style: { fontSize: 22 } }}
-                  InputLabelProps={{ style: { fontSize: 22 } }} />
-
-                <Field
-                  className='field'
-                  component={DatePicker}
-                  name="end_date"
-                  label="End Date"
-                  inputProps={{ style: { fontSize: 22 } }}
-                  InputLabelProps={{ style: { fontSize: 22 } }} />
-                  </> : <datepicker value={value} multiple onChange={setValue} /> }
-                <Field
-                  component={TextField}
-                  className='field'
-                  type="text"
-                  name="product"
-                  label="Products"
-                  select
-                  variant="standard"
-                  helperText="Select Product"
-                  margin="normal"
-                  inputProps={{ style: { fontSize: 25 } }}
                   InputLabelProps={{ style: { fontSize: 22 } }}
                 >
-                  {Product.map((data, index) => (
-                    <MenuItem key={index} value={data}>
-                      {data}
-                    </MenuItem>
-                  ))}
-                </Field>
+                  Subscribe
+            </Button>
 
               </div>
             </Form>
